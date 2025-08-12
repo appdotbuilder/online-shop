@@ -1,28 +1,21 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
-
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
+import React, { FormEventHandler } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-type LoginForm = {
-    email: string;
-    password: string;
-    remember: boolean;
-};
 
-interface LoginProps {
+
+
+interface Props {
     status?: string;
     canResetPassword: boolean;
+    [key: string]: unknown;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
+export default function Login({ status, canResetPassword }: Props) {
+    const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
@@ -30,81 +23,134 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+
         post(route('login'), {
-            onFinish: () => reset('password'),
+            onFinish: () => reset(),
         });
     };
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
+        <>
+            <Head title="Masuk - TechStore" />
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
+            <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-50 dark:bg-gray-900">
+                {/* Header */}
+                <div className="w-full sm:max-w-md px-6 py-4 mb-6">
+                    <Link href="/" className="flex items-center justify-center">
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                            🛒 <span className="text-red-600">TechStore</span>
+                        </h1>
+                    </Link>
+                </div>
 
-                    <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
-                            {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
-                                </TextLink>
-                            )}
+                {/* Login Form */}
+                <Card className="w-full sm:max-w-md shadow-lg">
+                    <CardHeader className="text-center">
+                        <CardTitle className="text-2xl font-bold">🔑 Masuk ke Akun Anda</CardTitle>
+                        <CardDescription>
+                            Masukkan email dan password untuk mengakses dashboard
+                        </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                        {status && (
+                            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                                <p className="text-sm text-green-600">{status}</p>
+                            </div>
+                        )}
+
+                        <form onSubmit={submit} className="space-y-4">
+                            <div>
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    value={data.email}
+                                    className="mt-1 block w-full"
+                                    autoComplete="username"
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    placeholder="nama@email.com"
+                                />
+                                {errors.email && (
+                                    <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Label htmlFor="password">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    value={data.password}
+                                    className="mt-1 block w-full"
+                                    autoComplete="current-password"
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="Masukkan password"
+                                />
+                                {errors.password && (
+                                    <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                                )}
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    id="remember"
+                                    name="remember"
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                    checked={data.remember}
+                                    onChange={(e) => setData('remember', e.target.checked as false)}
+                                />
+                                <Label htmlFor="remember" className="text-sm">
+                                    Ingat saya
+                                </Label>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                {canResetPassword && (
+                                    <Link
+                                        href={route('password.request')}
+                                        className="text-sm text-red-600 hover:text-red-500"
+                                    >
+                                        Lupa password?
+                                    </Link>
+                                )}
+                            </div>
+
+                            <Button 
+                                type="submit" 
+                                className="w-full bg-red-600 hover:bg-red-700"
+                                disabled={processing}
+                            >
+                                {processing ? '⏳ Masuk...' : '🚀 Masuk'}
+                            </Button>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Belum punya akun?{' '}
+                                <Link
+                                    href={route('register')}
+                                    className="font-medium text-red-600 hover:text-red-500"
+                                >
+                                    Daftar sekarang
+                                </Link>
+                            </p>
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
+                    </CardContent>
+                </Card>
 
-                    <div className="flex items-center space-x-3">
-                        <Checkbox
-                            id="remember"
-                            name="remember"
-                            checked={data.remember}
-                            onClick={() => setData('remember', !data.remember)}
-                            tabIndex={3}
-                        />
-                        <Label htmlFor="remember">Remember me</Label>
-                    </div>
-
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
-                    </Button>
+                <div className="mt-6 text-center">
+                    <Link
+                        href="/"
+                        className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    >
+                        ← Kembali ke beranda
+                    </Link>
                 </div>
-
-                <div className="text-center text-sm text-muted-foreground">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div>
-            </form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
+            </div>
+        </>
     );
 }
